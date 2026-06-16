@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[e][s][t][a][r]_[e][n]_[c][o][m][ú][n]</title>
+    <style>
+        /* Variables globales con esquema de tres estados */
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --border: #000000;
+            --surface: #f4f4f4;
+            --accent: #555555;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        /* Barra Superior Fija */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            border-bottom: 2px solid var(--border);
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+
+        .top-left, .top-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--surface);
+        }
+
+        .phrases-ticker {
+            font-size: 0.85rem;
+            font-style: italic;
+            color: var(--accent);
+            text-align: center;
+            max-width: 40%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Barra Lateral Fija */
+        .sidebar {
+            position: fixed;
+            top: 50px;
+            left: 0;
+            width: 200px;
+            height: calc(100vh - 50px);
+            border-right: 2px solid var(--border);
+            background-color: var(--bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 90;
+        }
+
+        .format-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .format-btn:last-child {
+            border-bottom: none;
+        }
+
+        .format-btn:hover {
+            background-color: var(--surface);
+        }
+
+        .format-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Cuerpo Principal de la Web */
+        .main-container {
+            position: absolute;
+            top: 50px;
+            left: 200px;
+            width: calc(100vw - 200px);
+            height: calc(100vh - 50px);
+            overflow-y: auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Encabezados Persistentes en el Generador */
+        .persistent-header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .editable-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: inline-block;
+            outline: none;
+            border-bottom: 1px dashed var(--accent);
+            padding-right: 5px;
+        }
+
+        .persistent-subtitle {
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        /* Vistas dinámicas */
+        .view-section {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Vista Home */
+        #view-home {
+            max-width: 650px;
+            text-align: left;
+        }
+        #view-home h2 { margin-bottom: 15px; font-size: 1.5rem; }
+        #view-home p { margin-bottom: 15px; font-size: 1rem; }
+        .quote-block {
+            border-left: 3px solid var(--border);
+            padding-left: 15px;
+            margin: 25px 0;
+            font-style: italic;
+        }
+
+        /* Área de Resultados del Generador */
+        .generator-card {
+            border: 1px dashed var(--border);
+            background-color: var(--surface);
+            padding: 25px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .metadata-box {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .meta-line {
+            margin-bottom: 6px;
+            border-bottom: 1px solid var(--surface);
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .media-preview-box {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .media-preview-box img {
+            max-width: 100%;
+            max-height: 350px;
+            object-fit: containment;
+        }
+
+        .media-preview-box audio {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .text-placeholder, .video-placeholder {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        .action-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .action-link {
+            display: inline-block;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            padding: 8px 16px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .download-instruction-link {
+            color: var(--text);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Vista Repositorio */
+        .repo-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .repo-item {
+            border: 1px solid var(--border);
+            background-color: var(--surface);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .repo-item:hover {
+            background-color: var(--text);
+            color: var(--bg);
+        }
+
+        .repo-footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* Vista Detalle de Obra Repositorio */
+        .repo-detail-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+
+        .repo-detail-meta {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        .repo-detail-preview {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .repo-detail-preview img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Paneles Modales y Desplegables (Derecha/Centro) */
+        .side-panel {
+            position: fixed;
+            top: 50px;
+            right: -100%;
+            width: 450px;
+            height: calc(100vh - 50px);
+            background-color: var(--bg);
+            border-left: 2px solid var(--border);
+            z-index: 120;
+            transition: right 0.3s ease;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .panel-close {
+            display: block;
+            margin-bottom: 20px;
+            text-align: right;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            font-family: var(--font-main);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .modal-content a {
+            color: #58a6ff;
+            text-decoration: underline;
+        }
+
+        .resources-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .resources-list li {
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Utilidades generales */
+        .text-block-compact {
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-left">
+            <button class="nav-btn" onclick="openHome()">🏠 Home</button>
+            <button class="nav-btn" onclick="openRepository()">📁 Repositorio</button>
+            <button class="nav-btn" onclick="toggleResourcesModal(true)">🔨 Recursos</button>
+        </div>
+        <div class="phrases-ticker" id="ticker-text">- Cargando fragmentos de realidad...</div>
+        <div class="top-right">
+            <button class="nav-btn" onclick="cycleColorMode()">☀</button>
+            <button class="nav-btn" onclick="toggleTermsPanel(true)">⚑ Términos</button>
+            <button class="nav-btn" onclick="closeBrowserTab()">✕</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <button class="format-btn" onclick="triggerFetch('image')">
+            <span class="format-icon">🖼</span>
+            <span>imagen</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('texts')">
+            <span class="format-icon">📖</span>
+            <span>texto</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('video')">
+            <span class="format-icon">🎬</span>
+            <span>video</span>
+        </button>
+        <button class="format-btn" onclick="triggerFetch('audio')">
+            <span class="format-icon">🎵</span>
+            <span>audio</span>
+        </button>
+    </div>
+
+    <div class="main-container">
+        
+        <div class="persistent-header" id="generator-header" style="display:none;">
+            <div class="editable-title" contenteditable="true" id="main-title">[e][s][t][a][r]_[e][n]_[c][o][m][ú][n]</div>
+            <div class="persistent-subtitle">← Seleccioná un formato para obtener una pieza aleatoria de Archive.org y transformarla.</div>
+        </div>
+
+        <div id="view-home" class="view-section active">
+            <h2>🌿 Bienvenida al Jardín Digital</h2>
+            <div class="text-block-compact">Hola, soy Leila. Soy estudiante de artes digitales, una artista en proceso y una entusiasta de las páginas colaborativas. Este jardín nace como un punto de encuentro entre personas y las ideas que flotan en el universo.
+            Aquí podés tomar una obra de internet — una imagen, un texto, un video o un sonido — y transformarla en algo nuevo. No importa si sos artista o no; lo que importa es la intención de hacer crecer.</div>
+            <div class="quote-block">
+                "El acto creativo no es sobre ser especial, sino sobre estar abierto a lo que ya existe."
+                <br>— Rick Rubin, The Creative Act: A Way of Being
+            </div>
+            <p>Espero te puedas sumar a esta actividad en este jardín digital. 🌱</p>
+            <p><strong>Todo es anti‑copyright, colaborativo y gratuito. No hay dueños, solo jardineros.</strong></p>
+        </div>
+
+        <div id="view-generator" class="view-section">
+            <div class="generator-card">
+                <div class="metadata-box">
+                    <div class="meta-line"><span class="meta-label">Título:</span> <span id="meta-title">-</span></div>
+                    <div class="meta-line"><span class="meta-label">Creado por:</span> <span id="meta-author">-</span></div>
+                    <div class="meta-line"><span class="meta-label">Tópicos:</span> <span id="meta-topics">-</span></div>
+                </div>
+
+                <div class="media-preview-box" id="media-preview-container">
+                    </div>
+
+                <div class="action-container">
+                    <a id="btn-view-original" class="action-link" target="_blank" href="#">Ver original</a>
+                </div>
+
+                <div style="font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 15px;">
+                    <strong>INSTRUCCIONES:</strong> <span class="download-instruction-link" onclick="executeDownloadTxt()">Descargá esta pieza</span>, intervenila con tus herramientas favoritas y compartí el resultado.
+                </div>
+            </div>
+        </div>
+
+        <div id="view-repository" class="view-section">
+            <h2 style="text-align: center; font-size: 1.4rem; text-transform: uppercase; margin-bottom: 10px;">Repositorio de obras digitales</h2>
+            <p style="text-align: center; font-size: 0.85rem; color: var(--accent); margin-bottom: 20px;">Listado de obras de participantes. Seleccioná una para ver su mutación.</p>
+            
+            <div class="repo-grid" id="repo-items-container">
+                </div>
+
+            <div class="repo-footer">
+                <button class="nav-btn" style="font-weight: bold;" onclick="selectRandomRepoItem()">| Aleatorio |</button>
+            </div>
+        </div>
+
+        <div id="view-repo-detail" class="view-section">
+            <h2 style="font-size: 1.3rem; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">Repositorio de obras digitales</h2>
+            
+            <div class="repo-detail-layout">
+                <div class="repo-detail-meta">
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Título:</span> <span id="detail-title">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Creado por:</span> <span id="detail-author">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Tópicos:</span> <span id="detail-topics">-</span></div>
+                    <div class="meta-line" style="margin-bottom:12px;"><span class="meta-label">Pieza original:</span> <a id="detail-original-link" target="_blank" style="color: var(--text);" href="#">url.com</a></div>
+                    <p id="detail-desc" style="font-size:0.85rem; margin-top:15px; font-style:italic; color:var(--accent);"></p>
+                </div>
+                <div class="repo-detail-preview" id="detail-preview-container">
+                    </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px;">
+                <button class="nav-btn" onclick="openRepository()">| Volver |</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="side-panel" id="panel-terms">
+        <span class="panel-close" onclick="toggleTermsPanel(false)">[Cerrar X]</span>
+        <h3 style="font-size: 1.1rem; text-transform: uppercase; margin-bottom: 15px;">Términos del Común</h3>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 15px; font-weight: bold; text-decoration: underline;">Texto Legible por Humanos:</p>
+        <p style="font-size: 0.85rem; margin-bottom: 20px;">Sos libre de tomar cualquier pieza de este jardín, romperla, transformarla y hacer arte digital con ella. No necesitás pedirle permiso a nadie ni pagar regalías. Este es un espacio común abierto para el intercambio libre y comunitario. Compartí lo que hagas y ayudanos a poblar el repositorio.</p>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 15px; font-weight: bold; text-decoration: underline;">Declaración Legal de Producción de Pares:</p>
+        <p style="font-size: 0.8rem; color: var(--accent); margin-bottom: 15px;">Se otorga permiso para compartir, copiar, distribuir, ejecutar y remezclar libremente las obras aquí contenidas bajo la condición estricta de mantener la libertad absoluta de todas las obras derivadas en el campo común. Las corporaciones comerciales de propiedad privada y monopólica quedan excluidas de la explotación comercial directa de estos bienes comunes sin el consentimiento explícito y asambleario de la comunidad unificada de jardineros.</p>
+        <p style="font-size: 0.8rem;"><a id="external-legal-link" href="https://endefensadelsl.org/ppl_deed_es.html" target="_blank" style="color: var(--text); font-weight:bold;">Ver Escritura Completa de la PPL</a></p>
+    </div>
+
+    <div class="modal-overlay" id="modal-resources" onclick="toggleResourcesModal(false)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="panel-close" style="color: #ffffff;" onclick="toggleResourcesModal(false)">[Cerrar X]</span>
+            <h3 style="font-size: 1.1rem; text-transform: uppercase; border-bottom: 1px dashed #ffffff; padding-bottom: 5px;">Caja de Herramientas</h3>
+            <ul class="resources-list">
+                <li>🔗 <a href="https://archive.org/" target="_blank">Archive.org</a> - Piezas base (imágenes, textos, videos, sonidos).</li>
+                <li>🔗 <a href="https://pixelbuddha.net/" target="_blank">Pixelbuddha</a> - Fuentes, efectos, gráficos y pinceles gratis.</li>
+                <li>🔗 <a href="https://copychar.cc/" target="_blank">Copychar.cc</a> - Copiar y pegar caracteres especiales.</li>
+                <li>🔗 <a href="https://texturelabs.org/" target="_blank">Texturelabs.org</a> - Base gigante de texturas gratuitas.</li>
+                <li>🔗 <a href="https://es.vecteezy.com/" target="_blank">Vecteezy</a> - Vectores y recursos gráficos limpios.</li>
+                <li>🔗 <a href="https://pixabay.com/" target="_blank">Pixabay</a> - Videos, fotografías y música libre.</li>
+                <li>🔗 <a href="https://freemusicarchive.org/home" target="_blank">Free Music Archive</a> - Recursos sonoros independientes.</li>
+                <li>🔗 <a href="https://www.bensound.com/free-music-for-videos" target="_blank">Bensound</a> - Música libre de derechos para videos.</li>
+                <li>🔗 <a href="https://freesfx.co.uk/" target="_blank">FreeSFX</a> - Efectos de sonido e impactos de audio sfx.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Ticker de frases aleatorias
+        const frasesTicker = [
+            "- La originalidad está sobrevalorada. — Kenneth Goldsmith",
+            "- El stream nos arrastra, el jardín nos enraíza. — Mike Caufield",
+            "- Presencia digital construida desde adentro. — Jaron Lanier",
+            "- Tierra cultivada para el deleite de los sentidos. — Mark Bernstein",
+            "- Curaduría y reencuadre sobre producción masiva.",
+            "- Hackear el archivo de la experiencia humana."
+        ];
+        
+        setInterval(() => {
+            const index = Math.floor(Math.random() * frasesTicker.length);
+            document.getElementById('ticker-text').innerText = frasesTicker[index];
+        }, 5000);
+
+        // Control de Paleta de Colores de 3 Estados (Claro, Oscuro, Aleatorio Brutal)
+        let colorState = 0; 
+        const brutalPalettes = [
+            { bg: '#f1faee', text: '#1d3557', border: '#1d3557', surface: '#a8dadc', accent: '#457b9d' },
+            { bg: '#fefae0', text: '#283618', border: '#283618', surface: '#dda15e', accent: '#606c38' },
+            { bg: '#e0f2fe', text: '#0f172a', border: '#0f172a', surface: '#bae6fd', accent: '#0284c7' },
+            { bg: '#fae8ff', text: '#581c87', border: '#581c87', surface: '#f5d0fe', accent: '#a21caf' }
+        ];
+
+        function cycleColorMode() {
+            colorState = (colorState + 1) % 3;
+            const root = document.documentElement;
+
+            if (colorState === 0) {
+                // Modo Claro Minimalista
+                root.style.setProperty('--bg', '#ffffff');
+                root.style.setProperty('--text', '#000000');
+                root.style.setProperty('--border', '#000000');
+                root.style.setProperty('--surface', '#f4f4f4');
+                root.style.setProperty('--accent', '#555555');
+            } else if (colorState === 1) {
+                // Modo Oscuro Común
+                root.style.setProperty('--bg', '#121212');
+                root.style.setProperty('--text', '#e5e5e5');
+                root.style.setProperty('--border', '#444444');
+                root.style.setProperty('--surface', '#1e1e1e');
+                root.style.setProperty('--accent', '#888888');
+            } else if (colorState === 2) {
+                // Modo Aleatorio Brutalista Curado
+                const randomPalette = brutalPalettes[Math.floor(Math.random() * brutalPalettes.length)];
+                root.style.setProperty('--bg', randomPalette.bg);
+                root.style.setProperty('--text', randomPalette.text);
+                root.style.setProperty('--border', randomPalette.border);
+                root.style.setProperty('--surface', randomPalette.surface);
+                root.style.setProperty('--accent', randomPalette.accent);
+            }
+        }
+
+        // Sistema de navegación de vistas del contenedor
+        function deactivateAllViews() {
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById('generator-header').style.display = 'none';
+        }
+
+        function openHome() {
+            deactivateAllViews();
+            document.getElementById('view-home').classList.add('active');
+        }
+
+        function openRepository() {
+            deactivateAllViews();
+            document.getElementById('view-repository').classList.add('active');
+        }
+
+        // Control de Paneles Flotantes y Modales
+        function toggleTermsPanel(open) {
+            const panel = document.getElementById('panel-terms');
+            if (open) panel.classList.add('open');
+            else panel.classList.remove('open');
+        }
+
+        function toggleResourcesModal(open) {
+            const modal = document.getElementById('modal-resources');
+            if (open) modal.style.display = 'flex';
+            else modal.style.display = 'none';
+        }
+
+        function closeBrowserTab() {
+            window.close();
+            alert("El botón está programado para cerrar la pestaña interna del navegador via window.close().");
+        }
+
+        // LÓGICA DE LA API DE ARCHIVE.ORG Y FILTRADOS
+        const historialVistos = { autores: [], paises: [], idiomas: [] };
+        let activeItem = null; 
+
+        async function triggerFetch(tipo) {
+            deactivateAllViews();
+            document.getElementById('generator-header').style.display = 'block';
+            
+            const viewGenerator = document.getElementById('view-generator');
+            viewGenerator.classList.add('active');
+
+            const metaTitle = document.getElementById('meta-title');
+            const metaAuthor = document.getElementById('meta-author');
+            const metaTopics = document.getElementById('meta-topics');
+            const mediaContainer = document.getElementById('media-preview-container');
+
+            metaTitle.innerText = "Interrogando la base de datos de la cultura libre...";
+            metaAuthor.innerText = "-";
+            metaTopics.innerText = "-";
+            mediaContainer.innerHTML = "";
+
+            // Titila el título dinámicamente durante la carga para dar feedback estético
+            const titleEl = document.getElementById('main-title');
+            titleEl.style.opacity = '0.4';
+
+            let tipoQuery = tipo;
+            if (tipo === 'video') tipoQuery = 'movies';
+
+            const topicsPermitidos = '(subject:"art" OR subject:"science" OR subject:"comic" OR subject:"women" OR subject:"feminism" OR subject:"men" OR subject:"politics" OR subject:"childhood" OR subject:"family" OR subject:"school" OR subject:"Art appreciation")';
+            const exclusionesEsteticas = '-subject:"portrait" -subject:"logo" -portrait -logo -collection:internetarchivebooks -mediatype:metadata';
+            const exclusionLicenciaBy = '-licenseurl:*by*';
+
+            const query = `mediatype:${tipoQuery} AND ${topicsPermitidos} AND ${exclusionesEsteticas} AND ${exclusionLicenciaBy}`;
+            const campos = 'identifier,title,creator,subject,language,coverage';
+            const url = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&fl[]=${campos}&rows=75&output=json`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                titleEl.style.opacity = '1';
+
+                if (!data.response || !data.response.docs || data.response.docs.length === 0) {
+                    metaTitle.innerText = "El éter está en silencio. No se encontraron resultados. Intentá de nuevo.";
+                    return;
+                }
+
+                const docs = data.response.docs;
+                const docsMezclados = docs.sort(() => Math.random() - 0.5);
+                let itemSeleccionado = null;
+
+                for (let doc of docsMezclados) {
+                    const autor = doc.creator || 'Anónimx';
+                    const pais = doc.coverage || 'Desconocido';
+                    const idioma = doc.language || 'Indeterminado';
+
+                    if (!historialVistos.autores.includes(autor) && 
+                        !historialVistos.paises.includes(pais) && 
+                        !historialVistos.idiomas.includes(idioma)) {
+                        
+                        itemSeleccionado = doc;
+                        historialVistos.autores.push(autor);
+                        historialVistos.paises.push(pais);
+                        historialVistos.idiomas.push(idioma);
+                        
+                        if(historialVistos.autores.length > 5) {
+                            historialVistos.autores.shift();
+                            historialVistos.paises.shift();
+                            historialVistos.idiomas.shift();
+                        }
+                        break; 
+                    }
+                }
+
+                if (!itemSeleccionado) itemSeleccionado = docsMezclados[0];
+                activeItem = itemSeleccionado;
+
+                // Renderizado
+                metaTitle.innerText = itemSeleccionado.title || "Obra sin título";
+                metaAuthor.innerText = itemSeleccionado.creator || "Autoría desconocida";
+                
+                let topicsStr = "Cultura Libre";
+                if (itemSeleccionado.subject) {
+                    const arr = Array.isArray(itemSeleccionado.subject) ? itemSeleccionado.subject : [itemSeleccionado.subject];
+                    topicsStr = arr.slice(0, 5).join(", ");
+                }
+                metaTopics.innerText = topicsStr;
+
+                document.getElementById('btn-view-original').href = `https://archive.org/details/${itemSeleccionado.identifier}`;
+
+                // Inyección según el formato
+                if (tipo === 'image') {
+                    mediaContainer.innerHTML = `<img src="https://archive.org/services/img/${itemSeleccionado.identifier}" alt="Brote del Jardín">`;
+                } else if (tipo === 'audio') {
+                    mediaContainer.innerHTML = `
+                        <audio controls>
+                            <source src="https://archive.org/download/${itemSeleccionado.identifier}/${itemSeleccionado.identifier}.mp3" type="audio/mpeg">
+                            Tu navegador no soporta streaming directo.
+                        </audio>`;
+                } else if (tipo === 'video') {
+                    mediaContainer.innerHTML = `
+                        <div class="video-placeholder">
+                            📺 [Archivo de Video Detectado]<br>
+                            Archive.org requiere visualización en su ecosistema nativo para metrajes antiguos.<br>
+                            Hacé click en "Ver original" para extraer sus fragmentos de película.
+                        </div>`;
+                } else {
+                    mediaContainer.innerHTML = `
+                        <div class="text-placeholder">
+                            📄 [Documentación de Texto o Revista Digitalizada]<br>
+                            Material listo para recontextualización tipográfica y lectura libre.
+                        </div>`;
+                }
+
+            } catch (err) {
+                titleEl.style.opacity = '1';
+                metaTitle.innerText = "Interrupción en la red. Probá nuevamente.";
+                console.error(err);
+            }
+        }
+
+        // Lógica de descarga automatizada de metadatos (.txt)
+        function executeDownloadTxt() {
+            if (!activeItem) {
+                alert("Primero debés generar una pieza usando los botones de formato de la barra lateral.");
+                return;
+            }
+
+            let topicsStr = "General / Cultura Libre";
+            if (activeItem.subject) {
+                const arr = Array.isArray(activeItem.subject) ? activeItem.subject : [activeItem.subject];
+                topicsStr = arr.join(", ");
+            }
+
+            const contenidoTxt = `Título: ${activeItem.title || 'Obra sin título'}
+Creado por: ${activeItem.creator || 'Desconocido u Obra Colectiva'}
+Tópicos: ${topicsStr}
+Link original: https://archive.org/details/${activeItem.identifier}
+
+--- INSTRUCCIONES ---
+Descargá esta pieza, intervenila con tus herramientas favoritas (digitales o artesanales) y luego compartí el resultado en nuestro Jardín Digital.
+Para compartir tu nueva obra, entrá a la sección "Repositorio" y subí tu creación.
+🌱 Jardín Digital — anti‑copyright, colaborativo, abierto.`;
+
+            const blob = new Blob([contenidoTxt], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${activeItem.identifier || 'pieza_jardin'}_metadatos.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // BASE DE DATOS E INTERACTIVIDAD DEL REPOSITORIO (10 Ejemplos de Participantes)
+        const mockRepoData = [
+            { id: 1, user: "(xxiivv)", title: "Remix_01_canvas", artist: "Aguilar Leila", topics: "oil, painting, canvas, art, hat", originalUrl: "https://archive.org/details/earlybrahmiinscr0000sarm", desc: "Intervención cromática digital rompiendo las líneas geométricas.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23222'/><text x='10' y='100' fill='white' font-family='monospace'>[Glitch Canvas #1]</text></svg>" },
+            { id: 2, user: "(drisc)", title: "Ecos_De_Radio_Feminista", artist: "Aguilar Leila", topics: "audio, speech, modular, school", originalUrl: "https://archive.org/details/radio_brote", desc: "Superposición de voces y texturas de baja frecuencia.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23444'/><text x='10' y='100' fill='white' font-family='monospace'>[Audio Fragment #2]</text></svg>" },
+            { id: 3, user: "(electro_pizza)", title: "Desvío_Tipográfico_Comic", artist: "Aguilar Leila", topics: "comic, text, structure, family", originalUrl: "https://archive.org/details/comic_archive", desc: "Recontextualización de viñetas históricas escolares mediante código.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23333'/><text x='10' y='100' fill='white' font-family='monospace'>[Comic Desvío #3]</text></svg>" },
+            { id: 4, user: "(avanier)", title: "Estudio_Materia_Secundaria", artist: "Aguilar Leila", topics: "science, biology, abstract", originalUrl: "https://archive.org/details/science_book", desc: "Filtros analógicos sobre ilustraciones botánicas de Dominio Público.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23555'/><text x='10' y='100' fill='white' font-family='monospace'>[Materia Study #4]</text></svg>" },
+            { id: 5, user: "(detritus.zone)", title: "Propaganda_Reciclada_1950", artist: "Aguilar Leila", topics: "politics, vintage, video, cut", originalUrl: "https://archive.org/details/movie_politics", desc: "Collage rítmico utilizando software libre de edición audiovisual.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%231a1a1a'/><text x='10' y='100' fill='white' font-family='monospace'>[Video Cut #5]</text></svg>" },
+            { id: 6, user: "(hraew.autophagy)", title: "Poesía_No_Creativa_Brote", artist: "Aguilar Leila", topics: "texts, poetry, goldsmith, art", originalUrl: "https://archive.org/details/texts_poetry", desc: "Apropiación cruda de un manual escolar de geografía de 1920.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%232d2d2d'/><text x='10' y='100' fill='white' font-family='monospace'>[Poetry Text #6]</text></svg>" },
+            { id: 7, user: "(horacl.os)", title: "Deriva_Urbana_Sonora", artist: "Aguilar Leila", topics: "audio, field_recording, noise", originalUrl: "https://archive.org/details/noise_city", desc: "Paisaje sonoro intervenido mediante distorsiones de cinta magnética.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%234c4c4c'/><text x='10' y='100' fill='white' font-family='monospace'>[City Noise #7]</text></svg>" },
+            { id: 8, user: "(lectronice)", title: "Fanzine_Digital_Infancias", artist: "Aguilar Leila", topics: "childhood, illustration, book", originalUrl: "https://archive.org/details/children_illustrations", desc: "Compilación de grabados infantiles antiguos re-iluminados.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%233a3a3a'/><text x='10' y='100' fill='white' font-family='monospace'>[Fanzine Core #8]</text></svg>" },
+            { id: 9, user: "(longest.voyage)", title: "Manifiesto_Hack_Feminista", artist: "Aguilar Leila", topics: "women, politics, essay", originalUrl: "https://archive.org/details/women_essay", desc: "Recontextualización tipográfica de proclamas políticas del siglo XIX.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%231f1f1f'/><text x='10' y='100' fill='white' font-family='monospace'>[Manifesto Text #9]</text></svg>" },
+            { id: 10, user: "(nonmateria)", title: "Apreciación_Del_Caos", artist: "Aguilar Leila", topics: "Art appreciation, abstract, visual", originalUrl: "https://archive.org/details/caos_visual", desc: "Superposiciones digitales de texturas rugosas extraídas de grabados.", img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><rect width='100%' height='100%' fill='%23292929'/><text x='10' y='100' fill='white' font-family='monospace'>[Caos Study #10]</text></svg>" }
+        ];
+
+        function initRepositoryGrid() {
+            const container = document.getElementById('repo-items-container');
+            container.innerHTML = "";
+            mockRepoData.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "repo-item";
+                el.innerText = `${item.id}. ${item.user}`;
+                el.onclick = () => openRepoDetail(item.id);
+                container.appendChild(el);
+            });
+        }
+
+        function openRepoDetail(id) {
+            const item = mockRepoData.find(x => x.id === id);
+            if (!item) return;
+
+            deactivateAllViews();
+            document.getElementById('view-repo-detail').classList.add('active');
+
+            document.getElementById('detail-title').innerText = item.title;
+            document.getElementById('detail-author').innerText = item.artist;
+            document.getElementById('detail-topics').innerText = item.topics;
+            
+            const linkEl = document.getElementById('detail-original-link');
+            linkEl.href = item.originalUrl;
+            linkEl.innerText = item.originalUrl;
+
+            document.getElementById('detail-desc').innerText = item.desc ? `Nota de autoría: "${item.desc}"` : "";
+            document.getElementById('detail-preview-container').innerHTML = `<img src="${item.img}" alt="${item.title}">`;
+        }
+
+        function selectRandomRepoItem() {
+            const randomId = Math.floor(Math.random() * mockRepoData.length) + 1;
+            openRepoDetail(randomId);
+        }
+
+        // Carga inicial al levantar la aplicación
+        window.onload = () => {
+            initRepositoryGrid();
+            openHome();
+        };
+    </script>
+</body>
+</html>
